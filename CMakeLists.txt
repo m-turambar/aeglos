@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-project (Stormbreaker)
+project (aeglos)
 
 find_package(OpenCV REQUIRED)
 # find_package(X11 REQUIRED)
@@ -38,21 +38,21 @@ target_compile_definitions (mjolnir PRIVATE
 )
 
 
-add_executable (stormbreaker
+add_executable (aeglos
     main.cpp
     utils/sistema_archivos.cpp
 )
 
-target_include_directories (stormbreaker PUBLIC
+target_include_directories (aeglos PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries (stormbreaker
+target_link_libraries (aeglos
     ${OpenCV_LIBS}
     mjolnir
 )
 
-target_compile_definitions (stormbreaker PRIVATE
+target_compile_definitions (aeglos PRIVATE
     PROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 )
 
