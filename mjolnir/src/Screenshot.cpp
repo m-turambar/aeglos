@@ -1,9 +1,10 @@
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <cstdint>
 #include <cstring>
 #include <vector>
 
+#if defined(LINUX) || defined(__linux__) || defined(__linux)
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 // robo! calumnia!
 void ImageFromDisplay(std::vector<uint8_t>& Pixels, int& Width, int& Height, int& BitsPerPixel)
 {
@@ -26,3 +27,9 @@ void ImageFromDisplay(std::vector<uint8_t>& Pixels, int& Width, int& Height, int
   XDestroyImage(img);
   XCloseDisplay(display);
 }
+#else
+void ImageFromDisplay(std::vector<uint8_t>& Pixels, int& Width, int& Height, int& BitsPerPixel)
+{
+    
+}
+#endif

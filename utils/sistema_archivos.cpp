@@ -1,16 +1,15 @@
-#include "utils/sistema_archivos.h"
+#include "sistema_archivos.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
-#ifdef _WIN32
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-#else
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
-#endif
 
+namespace fs = std::filesystem;
 using namespace std;
+
+std::filesystem::path file_dialog_script =
+    std::filesystem::path(PROJECT_SOURCE_DIR) /
+    "scripts" /
+    "file_dialog.py";
  
 vector<string> get_file_names(std::string dir_name)
 {

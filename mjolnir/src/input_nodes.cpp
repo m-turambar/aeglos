@@ -2,7 +2,7 @@
 #include <opencv2/videoio/registry.hpp>
 #include "input_nodes.h"
 #include "utils/sistema_archivos.h"
-#include "Screenshot.h"
+#include "screenshot.h"
 
 using namespace std;
 
@@ -58,16 +58,18 @@ void nodo_video::procesar()
 nodo_im_selector::nodo_im_selector(cv::Point c, int r):
     nodo(c,r)
 {
-    int retorno = system("python3 ./scripts/file_dialog.py > tmp_fname.txt");
+    std::string command = "python3 \"" + file_dialog_script.string() + "\" > tmp_fname.txt";
+    int retorno = system(command.c_str());
     if(retorno==0) {
-    std::ifstream ifs("tmp_fname.txt", std::ios::in);
-    std::string fname;
-    std::getline(ifs,fname);
-    mmat = cv::imread(fname);
-    sid = fname;
+        std::ifstream ifs("tmp_fname.txt", std::ios::in);
+        std::string fname;
+        std::getline(ifs,fname);
+        mmat = cv::imread(fname);
+        sid = fname;
     }
-    else
-    sid = "Imagen" + sid;
+    else {
+        sid = "Imagen" + sid;
+    }
 }
 
 /************************************************/
@@ -77,12 +79,12 @@ nodo_iter_dir::nodo_iter_dir(cv::Point c, int r):
 {
     int retorno = system("python3 ./scripts/directory_dialog.py > tmp_fname.txt");
     if(retorno==0) {
-    std::ifstream ifs("tmp_fname.txt", std::ios::in);
-    std::getline(ifs,dir_name);
-    files = get_file_names(dir_name);
-    if(files.size() > 0)
-        mmat = cv::imread(files[i]);
-    sid = dir_name;
+        std::ifstream ifs("tmp_fname.txt", std::ios::in);
+        std::getline(ifs,dir_name);
+        files = get_file_names(dir_name);
+        if(files.size() > 0)
+            mmat = cv::imread(files[i]);
+        sid = dir_name;
     }
     else
     sid = "Empty_dir";

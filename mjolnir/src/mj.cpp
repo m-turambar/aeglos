@@ -62,7 +62,7 @@ mj::mj()
 
 void mj::run() {
 
-/*
+
   while(true)
   {
     auto cyc1 = std::chrono::system_clock::now();
@@ -75,7 +75,7 @@ void mj::run() {
     if(b_dibujando_objeto) //dibujamos un objeto temporal
     {
         Point hipot = pt_termino - pt_inicio;
-        int radio = std::hypot(hipot.x, hipot.y);
+        int radio = static_cast<int>(std::hypot(hipot.x, hipot.y));
         ptr_ultimo->radio = radio;
     }
 
@@ -98,22 +98,22 @@ void mj::run() {
     auto dur = std::chrono::duration_cast<chrono::milliseconds>(cyc2 - cyc1).count();
     cout << "ciclo: " << dur << "ms\n";
   }
-  */
+  
 
-    generar_red_tibia();
-    while (true) {
-        auto cyc1 = std::chrono::system_clock::now();
-        waitKey(5);
-        for (auto &uptr : nodos) {
-            uptr->procesar();
-            if(uptr->b_mostrar)
-                uptr->mostrar();
-        }
+    // generar_red_tibia();
+    // while (true) {
+    //     auto cyc1 = std::chrono::system_clock::now();
+    //     waitKey(5);
+    //     for (auto &uptr : nodos) {
+    //         uptr->procesar();
+    //         if(uptr->b_mostrar)
+    //             uptr->mostrar();
+    //     }
 
-        auto cyc2 = std::chrono::system_clock::now();
-        /*auto dur = */std::chrono::duration_cast<chrono::milliseconds>(cyc2 - cyc1).count();
-        //cout << "ciclo: " << dur << "ms\n";
-    }
+    //     auto cyc2 = std::chrono::system_clock::now();
+    //     auto dur = std::chrono::duration_cast<chrono::milliseconds>(cyc2 - cyc1).count();
+    //     //cout << "ciclo: " << dur << "ms\n";
+    // }
 }
 
 
@@ -163,8 +163,11 @@ void mj::cb_teclado(char k)
   case 'h':
     /*Leer el mapa de caracteres e imprimirlo*/
     break;
+  case 'i':
+    ptr_ultimo = crear_nodo<nodo_im_selector>();
+    break;
   case 'j':
-    ptr_ultimo = crear_nodo<nodo_iter_dir>("./sw_team");
+    // ptr_ultimo = crear_nodo<nodo_iter_dir>("./sw_team");
     break;
   case 'l':
     ptr_ultimo = crear_nodo<nodo_laplace>();
@@ -324,8 +327,11 @@ nodo* crear_nodo(Args... args)
     ptr_seleccionado->seleccionar(false);
 
   Point hipot = pt_termino - pt_inicio;
-  int radio = hypot(hipot.x, hipot.y);
+
+  // todo: fix double to int cast
+  int radio = static_cast<int>(hypot(hipot.x, hipot.y));
   unique_ptr<Tipo_Nodo> uptr = std::make_unique<Tipo_Nodo>(pt_inicio, radio, args...);
+
   nodo* ptr_ult = uptr.get();
   mj::nodos.emplace_back(std::move(uptr));
   ptr_highlight=ptr_seleccionado=nullptr;
@@ -362,6 +368,9 @@ nodo* encontrar_ptr_area(cv::Point& p)
   return nullptr;
 };
 
+
+// These functions don't belong here. Refactor.
+
 void generar_red_piel()
 {
   const int radio = 500;
@@ -383,6 +392,7 @@ void generar_red_piel()
   nbwand->suscribir_a(nv);
   nbwand->suscribir_a(nblur);
 }
+
 
 void generar_red_tibia()
 {
@@ -448,7 +458,4 @@ void generar_red_tibia()
     cout << "vida_mana.mmat ? " << vida_mana->mmat.empty() << '\n';
     cout << "vida_mana.roja ? " << vida_mana->roja.empty() << '\n';
     cout << "vida_mana.azul ? " << vida_mana->azul.empty() << '\n';
-
-
 }
-

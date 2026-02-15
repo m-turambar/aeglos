@@ -16,9 +16,10 @@ void nodo_gris::procesar()
 
 nodo_blur::nodo_blur(cv::Point c, int r) : nodo(c, r)
 {
-    cv::createTrackbar("kernel_sz", sid, &kernel_sz, 23);
     mcolor = cv::Scalar(100, 50, 190);
     sid = "blur" + sid;
+    cv::namedWindow(sid);
+    cv::createTrackbar("kernel_sz", sid, &kernel_sz, 23);
 }
 
 void nodo_blur::procesar()
@@ -28,8 +29,6 @@ void nodo_blur::procesar()
         kernel_sz = kernel_sz < 1 ? 1 : kernel_sz;
         cv::blur(msrc, mmat, cv::Size(kernel_sz, kernel_sz));
     }
-
-    cv::createTrackbar("kernel_sz", sid, &kernel_sz, 13);
 };
 
 /***********************************************/
@@ -38,6 +37,8 @@ nodo_canny::nodo_canny(cv::Point c, int r) : nodo(c, r)
 {
     mcolor = cv::Scalar(230, 230, 230);
     sid = "Canny" + sid;
+    cv::namedWindow(sid);
+    cv::createTrackbar("umbral", sid, &umbral_borde, 13);
 }
 
 void nodo_canny::procesar()
@@ -47,7 +48,6 @@ void nodo_canny::procesar()
         /* por qué por 3? */
         cv::Canny(msrc, mmat, umbral_borde, umbral_borde * 3);
     }
-    cv::createTrackbar("umbral", sid, &umbral_borde, 13);
 };
 
 /************************************************/
@@ -56,6 +56,9 @@ nodo_laplace::nodo_laplace(cv::Point c, int r) : nodo(c, r)
 {
     mcolor = cv::Scalar(230, 230, 230);
     sid = "Laplace" + sid;
+    cv::namedWindow(sid);
+    cv::createTrackbar("sigma", sid, &sigma, 13);
+    cv::createTrackbar("scale", sid, &scale, 5);
 }
 
 void nodo_laplace::procesar()
@@ -67,8 +70,6 @@ void nodo_laplace::procesar()
         cv::Laplacian(smooth, laplaciana, CV_16S, ksize, scale, 0);
         convertScaleAbs(laplaciana, mmat, (sigma + 1) * 0.25);
     }
-    cv::createTrackbar("sigma", sid, &sigma, 13);
-    cv::createTrackbar("scale", sid, &scale, 5);
 };
 
 /************************************************/
@@ -78,13 +79,13 @@ nodo_hsv::nodo_hsv(cv::Point c, int r) : nodo(c, r)
     mcolor = cv::Scalar(23, 80, 230);
     sid = "HSV" + sid;
 }
+
 void nodo_hsv::procesar()
 {
     if (!msrc.empty())
     {
         cv::cvtColor(msrc, mmat, cv::COLOR_BGR2HSV);
     }
-    //cv::createTrackbar("umbral", sid, &umbral_borde, 13);
 };
 
 /****************************************************/
@@ -93,7 +94,11 @@ nodo_erosion_dilacion::nodo_erosion_dilacion(cv::Point c, int r) : nodo(c, r)
 {
     mcolor = cv::Scalar(23, 0, 30);
     sid = "erosion_dilacion" + sid;
+    cv::namedWindow(sid);
+    cv::createTrackbar("kernel_erosion", sid, &kernel_erosion_sz, 19);
+    cv::createTrackbar("kernel_dilacion", sid, &kernel_dilacion_sz, 19);
 }
+
 void nodo_erosion_dilacion::procesar()
 {
     if (!msrc.empty())
@@ -105,17 +110,23 @@ void nodo_erosion_dilacion::procesar()
         cv::erode(msrc, mmat, kernel_erosion, cv::Point(-1, -1), 2);
         cv::dilate(mmat, mmat, kernel_dilacion, cv::Point(-1, -1), 2);
     }
-    cv::createTrackbar("kernel_erosion", sid, &kernel_erosion_sz, 19);
-    cv::createTrackbar("kernel_dilacion", sid, &kernel_dilacion_sz, 19);
 }
 
 /*******************************************************/
-nodo_mascara::nodo_mascara(cv::Point c, int r) : nodo(c, r),
-                                                 hl(0), sl(95), vl(96),
-                                                 hh(20), sh(200), vh(175)
+nodo_mascara::nodo_mascara(cv::Point c, int r)
+    : nodo(c, r)
+    , hl(0), sl(95), vl(96)
+    , hh(20), sh(200), vh(175)
 {
     mcolor = cv::Scalar(0, 255, 200);
     sid = "mascara" + sid;
+    cv::namedWindow(sid);
+    cv::createTrackbar("Hue L", sid, &hl, 255);
+    cv::createTrackbar("Hue H", sid, &hh, 255);
+    cv::createTrackbar("Sat L", sid, &sl, 255);
+    cv::createTrackbar("Sat H", sid, &sh, 255);
+    cv::createTrackbar("Val L", sid, &vl, 255);
+    cv::createTrackbar("Val H", sid, &vh, 255);
 }
 
 void nodo_mascara::procesar()
@@ -125,12 +136,6 @@ void nodo_mascara::procesar()
         cv::Scalar lower = cv::Scalar(hl, sl, vl);
         cv::Scalar upper = cv::Scalar(hh, sh, vh);
         cv::inRange(msrc, lower, upper, mmat);
-        cv::createTrackbar("Hue L", sid, &hl, 255);
-        cv::createTrackbar("Hue H", sid, &hh, 255);
-        cv::createTrackbar("Sat L", sid, &sl, 255);
-        cv::createTrackbar("Sat H", sid, &sh, 255);
-        cv::createTrackbar("Val L", sid, &vl, 255);
-        cv::createTrackbar("Val H", sid, &vh, 255);
     }
 }
 
@@ -172,6 +177,10 @@ nodo_filtro_bilateral::nodo_filtro_bilateral(cv::Point c, int r) : nodo(c, r)
 {
     mcolor = cv::Scalar(123, 123, 60);
     sid = "Filtro_bilateral" + sid;
+    cv::namedWindow(sid);
+    cv::createTrackbar("d", sid, &d, 10);
+    cv::createTrackbar("Sigma Color", sid, &sigmaColor, 500);
+    cv::createTrackbar("Sigma Space", sid, &sigmaSpace, 500);
 }
 void nodo_filtro_bilateral::procesar()
 {
@@ -179,9 +188,6 @@ void nodo_filtro_bilateral::procesar()
     {
         d = d < 1 ? 1 : d;
         cv::bilateralFilter(msrc, mmat, d, sigmaColor, sigmaSpace);
-        cv::createTrackbar("d", sid, &d, 10);
-        cv::createTrackbar("Sigma Color", sid, &sigmaColor, 500);
-        cv::createTrackbar("Sigma Space", sid, &sigmaSpace, 500);
     }
 }
 
@@ -207,4 +213,3 @@ void nodo_hough_circulo::procesar()
         }
     }
 }
-

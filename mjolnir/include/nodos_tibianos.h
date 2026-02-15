@@ -1,9 +1,5 @@
-//
-// Created by mike on 11/04/21.
-//
 
-#ifndef STORMBREAKER_NODOS_TIBIANOS_H
-#define STORMBREAKER_NODOS_TIBIANOS_H
+#pragma once
 
 #include "nodo.h"
 #include <opencv2/highgui.hpp>
@@ -37,21 +33,3 @@ struct nodo_porcentaje_vida_mana : nodo
     float calcular_vida();
     float calcular_mana();
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //STORMBREAKER_NODOS_TIBIANOS_H

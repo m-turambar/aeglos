@@ -1,5 +1,4 @@
-#ifndef MK_PROCESSING_NODES
-#define MK_PROCESSING_NODES
+#pragma once
 
 #include "nodo.h"
 #include <opencv2/highgui.hpp>
@@ -66,8 +65,6 @@ struct nodo_bitwise_and : nodo
   cv::Mat mmascara;
 };
 
-
-
 struct nodo_filtro_bilateral : nodo
 {
   nodo_filtro_bilateral(cv::Point c, int r);
@@ -82,5 +79,3 @@ struct nodo_hough_circulo : nodo
   virtual void procesar() override;
   std::vector<cv::Vec3f> circulos;
 };
-
-#endif

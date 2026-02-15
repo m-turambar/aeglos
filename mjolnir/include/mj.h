@@ -1,5 +1,4 @@
-#ifndef MJ_H
-#define MJ_H
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -16,14 +15,11 @@ struct mj
   void run();
 
   static cv::Mat diagrama;
-  const cv::Scalar bckgnd{cv::Scalar(153,125,130)};
-  bool exit{false};
+  const cv::Scalar bckgnd { cv::Scalar(153,125,130) };
+  bool exit { false };
   const std::string wname = "sbreaker";
   static cv::Point dxy;
   static cv::Point despl;
   static int zoom;
   static std::vector<std::unique_ptr<nodo>> nodos;
 };
-
-
-#endif // MJ_H
