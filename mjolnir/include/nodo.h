@@ -36,9 +36,9 @@ struct nodo
 
   virtual void mostrar() {
       if (b_mostrar) {
-        if (!mmat.empty()) {
+        if (!m_out.empty()) {
             cv::namedWindow(sid/*, cv::WINDOW_GUI_EXPANDED*/);
-            cv::imshow(sid, mmat);
+            cv::imshow(sid, m_out);
         }
     }
   }
@@ -57,8 +57,8 @@ struct nodo
   int id;
   std::string sid;
   static int gid; //global
-  cv::Mat mmat;
-  cv::Mat msrc; //ocupada solo por nodos que tengan input
+  cv::Mat m_out;
+  cv::Mat m_src; //ocupada solo por nodos que tengan input
 };
 
 cv::Mat make_mat_squared(cv::Mat& img);

@@ -10,18 +10,19 @@ nodo_video::nodo_video(cv::Point c, int r):
     nodo(c,r)
 {
     sid = "Video" + sid;
-    cap.open("/dev/video0");
-/*
-    cap.open("/dev/video1");
-    //cap.open("/dev/video0", cv::CAP_DSHOW);
-    //cap.open("/dev/video0", cv::CAP_FFMPEG);
+    m_cap.open(0, cv::CAP_DSHOW);
+    // m_cap.open("/dev/video0");
+    // m_cap.open("/dev/video1");
+    // m_cap.open("/dev/video0", cv::CAP_DSHOW);
+    // m_cap.open("/dev/video0", cv::CAP_FFMPEG);
 
     for(auto prop : get_camera_properties())
         cout << prop << '\n';
 
     //cout << cv::getBuildInformation();
-    //cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
-    //cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+    m_cap.set(cv::CAP_PROP_FRAME_WIDTH, 320);
+    m_cap.set(cv::CAP_PROP_FRAME_HEIGHT, 240);
+    m_cap.set(cv::CAP_PROP_FPS, 30);
 
     for(auto prop : get_camera_properties())
         cout << prop << '\n';
@@ -30,17 +31,16 @@ nodo_video::nodo_video(cv::Point c, int r):
     cout << "backends:\n";
     for(auto b : backends)
         cout << "\t" << b << "\n";
-        */
 }
 
 vector<double> nodo_video::get_camera_properties() {
     vector<double> props;
-    props.push_back(cap.get(CV_CAP_PROP_FRAME_WIDTH));
-    props.push_back(cap.get(CV_CAP_PROP_FRAME_HEIGHT));
-    props.push_back(cap.get(CV_CAP_PROP_FPS));
-    props.push_back(cap.get(CV_CAP_PROP_MODE));
-    props.push_back(cap.get(CV_CAP_PROP_AUTOFOCUS));
-    props.push_back(cap.get(CV_CAP_PROP_BUFFERSIZE));
+    props.push_back(m_cap.get(CV_CAP_PROP_FRAME_WIDTH));
+    props.push_back(m_cap.get(CV_CAP_PROP_FRAME_HEIGHT));
+    props.push_back(m_cap.get(CV_CAP_PROP_FPS));
+    props.push_back(m_cap.get(CV_CAP_PROP_MODE));
+    props.push_back(m_cap.get(CV_CAP_PROP_AUTOFOCUS));
+    props.push_back(m_cap.get(CV_CAP_PROP_BUFFERSIZE));
     return props;
 }
 
@@ -48,11 +48,11 @@ void nodo_video::procesar()
 {
     auto tiempo1 = std::chrono::system_clock::now();
 
-    cap >> mmat;
-    cout << mmat.rows << "x" << mmat.cols << endl;
-    auto tiempo2 = std::chrono::system_clock::now();
-    auto dur = std::chrono::duration_cast<chrono::milliseconds>(tiempo2 - tiempo1).count();
-    cout << "nodo_video::procesar(): "<< dur << "ms\n";
+    m_cap >> m_out;
+    // cout << m_out.rows << "x" << m_out.cols << endl;
+    // auto tiempo2 = std::chrono::system_clock::now();
+    // auto dur = std::chrono::duration_cast<chrono::milliseconds>(tiempo2 - tiempo1).count();
+    // cout << "nodo_video::procesar(): "<< dur << "ms\n";
 }
 
 nodo_im_selector::nodo_im_selector(cv::Point c, int r):
@@ -64,7 +64,7 @@ nodo_im_selector::nodo_im_selector(cv::Point c, int r):
         std::ifstream ifs("tmp_fname.txt", std::ios::in);
         std::string fname;
         std::getline(ifs,fname);
-        mmat = cv::imread(fname);
+        m_out = cv::imread(fname);
         sid = fname;
     }
     else {
@@ -83,7 +83,7 @@ nodo_iter_dir::nodo_iter_dir(cv::Point c, int r):
         std::getline(ifs,dir_name);
         files = get_file_names(dir_name);
         if(files.size() > 0)
-            mmat = cv::imread(files[i]);
+            m_out = cv::imread(files[i]);
         sid = dir_name;
     }
     else
@@ -96,7 +96,7 @@ nodo_iter_dir::nodo_iter_dir(cv::Point c, int r, std::string path):
     files = get_file_names(path);
     if(files.size() > 0)
     {
-        mmat = cv::imread(files[i]);
+        m_out = cv::imread(files[i]);
         sid = dir_name;
     }
     else
@@ -108,9 +108,9 @@ void nodo_iter_dir::actuar() {
     ++i; 
     if(i > files.size())
         i=0;
-    mmat = cv::imread(files[i]);
+    m_out = cv::imread(files[i]);
     for(auto n : suscriptores)
-        n->msrc = mmat;
+        n->m_src = m_out;
   }
 
 nodo_ss::nodo_ss(cv::Point c, int r) : nodo(c, r) {
@@ -129,16 +129,16 @@ void nodo_ss::procesar() {
   {
     cv::Mat img = cv::Mat(Height, Width, Bpp > 24 ? CV_8UC4 : CV_8UC3, &Pixels[0]); //Mat(Size(Height, Width), Bpp > 24 ? CV_8UC4 : CV_8UC3, &Pixels[0]);
     //cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
-    img.copyTo(mmat);
+    img.copyTo(m_out);
   }
 }
 
 nodo_im::nodo_im(cv::Point c, int r, const std::string path) : nodo(c, r)
 {
     b_mostrar=false;
-    mmat = cv::imread(path, cv::IMREAD_COLOR);
-    cout << "nodo_im::nodo_im -> " << path << " dims==" << mmat.dims << '\n';
-    if(mmat.dims == 0)
+    m_out = cv::imread(path, cv::IMREAD_COLOR);
+    cout << "nodo_im::nodo_im -> " << path << " dims==" << m_out.dims << '\n';
+    if(m_out.dims == 0)
         throw std::runtime_error("empty image read");
 }
 
@@ -149,9 +149,9 @@ nodo_subs::nodo_subs(cv::Point c, int r, const cv::Rect rec_arg)
     }
 
 void nodo_subs::procesar() {
-    if(!msrc.empty()) {
-        mmat = msrc(rec);
-        //cout << mmat.rows << "x" << mmat.cols << endl;
+    if(!m_src.empty()) {
+        m_out = m_src(rec);
+        //cout << m_out.rows << "x" << m_out.cols << endl;
     }
 
 }

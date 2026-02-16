@@ -46,7 +46,7 @@ struct nodo_video : nodo
     void procesar() override;
     std::vector<double> get_camera_properties();
 
-    cv::VideoCapture cap;
+    cv::VideoCapture m_cap;
 };
 
 struct nodo_ss : nodo

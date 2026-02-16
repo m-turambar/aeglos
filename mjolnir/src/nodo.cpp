@@ -30,7 +30,7 @@ void nodo::suscribir_a(nodo* src)
     std::cout << "suscribiendo " << sid << " a " << src->sid << ". " << src->sid << " -> " << sid << endl;
     proveedores.push_back(src);
     src->suscriptores.push_back(this);
-    msrc = src->mmat;
+    m_src = src->m_out;
   }
 }
 
@@ -110,7 +110,7 @@ bool nodo::pertenece_a_area(const cv::Point pt) const //pt debe ser absoluto
 void nodo::info()
 {
   cout << "<" << sid << ">\n";
-  cout << "Mat: " << mmat.type() << '\n';
+  cout << "Mat: " << m_out.type() << '\n';
   cout << "proveedores:\n";
   for(nodo* pr : proveedores)
     cout << "\t" << pr->sid << '\n';

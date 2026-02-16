@@ -8,8 +8,8 @@ nodo_gris::nodo_gris(cv::Point c, int r) : nodo(c, r)
 
 void nodo_gris::procesar()
 {
-    if (!msrc.empty())
-        cv::cvtColor(msrc, mmat, cv::COLOR_BGR2GRAY);
+    if (!m_src.empty())
+        cv::cvtColor(m_src, m_out, cv::COLOR_BGR2GRAY);
 }
 
 /********************************************/
@@ -24,10 +24,10 @@ nodo_blur::nodo_blur(cv::Point c, int r) : nodo(c, r)
 
 void nodo_blur::procesar()
 {
-    if (!msrc.empty())
+    if (!m_src.empty())
     {
         kernel_sz = kernel_sz < 1 ? 1 : kernel_sz;
-        cv::blur(msrc, mmat, cv::Size(kernel_sz, kernel_sz));
+        cv::blur(m_src, m_out, cv::Size(kernel_sz, kernel_sz));
     }
 };
 
@@ -43,10 +43,10 @@ nodo_canny::nodo_canny(cv::Point c, int r) : nodo(c, r)
 
 void nodo_canny::procesar()
 {
-    if (!msrc.empty())
+    if (!m_src.empty())
     {
         /* por qué por 3? */
-        cv::Canny(msrc, mmat, umbral_borde, umbral_borde * 3);
+        cv::Canny(m_src, m_out, umbral_borde, umbral_borde * 3);
     }
 };
 
@@ -63,12 +63,12 @@ nodo_laplace::nodo_laplace(cv::Point c, int r) : nodo(c, r)
 
 void nodo_laplace::procesar()
 {
-    if (!msrc.empty())
+    if (!m_src.empty())
     {
         int ksize = sigma | 1;
-        cv::GaussianBlur(msrc, smooth, cv::Size(ksize, ksize), sigma, sigma);
+        cv::GaussianBlur(m_src, smooth, cv::Size(ksize, ksize), sigma, sigma);
         cv::Laplacian(smooth, laplaciana, CV_16S, ksize, scale, 0);
-        convertScaleAbs(laplaciana, mmat, (sigma + 1) * 0.25);
+        convertScaleAbs(laplaciana, m_out, (sigma + 1) * 0.25);
     }
 };
 
@@ -82,9 +82,9 @@ nodo_hsv::nodo_hsv(cv::Point c, int r) : nodo(c, r)
 
 void nodo_hsv::procesar()
 {
-    if (!msrc.empty())
+    if (!m_src.empty())
     {
-        cv::cvtColor(msrc, mmat, cv::COLOR_BGR2HSV);
+        cv::cvtColor(m_src, m_out, cv::COLOR_BGR2HSV);
     }
 };
 
@@ -101,14 +101,14 @@ nodo_erosion_dilacion::nodo_erosion_dilacion(cv::Point c, int r) : nodo(c, r)
 
 void nodo_erosion_dilacion::procesar()
 {
-    if (!msrc.empty())
+    if (!m_src.empty())
     {
         kernel_erosion_sz = kernel_erosion_sz < 1 ? 1 : kernel_erosion_sz;
         kernel_dilacion_sz = kernel_dilacion_sz < 1 ? 1 : kernel_dilacion_sz;
         auto kernel_erosion = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernel_erosion_sz, kernel_erosion_sz));
         auto kernel_dilacion = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernel_dilacion_sz, kernel_dilacion_sz));
-        cv::erode(msrc, mmat, kernel_erosion, cv::Point(-1, -1), 2);
-        cv::dilate(mmat, mmat, kernel_dilacion, cv::Point(-1, -1), 2);
+        cv::erode(m_src, m_out, kernel_erosion, cv::Point(-1, -1), 2);
+        cv::dilate(m_out, m_out, kernel_dilacion, cv::Point(-1, -1), 2);
     }
 }
 
@@ -131,11 +131,11 @@ nodo_mascara::nodo_mascara(cv::Point c, int r)
 
 void nodo_mascara::procesar()
 {
-    if (!msrc.empty())
+    if (!m_src.empty())
     {
         cv::Scalar lower = cv::Scalar(hl, sl, vl);
         cv::Scalar upper = cv::Scalar(hh, sh, vh);
-        cv::inRange(msrc, lower, upper, mmat);
+        cv::inRange(m_src, lower, upper, m_out);
     }
 }
 
@@ -154,10 +154,10 @@ void nodo_bitwise_and::suscribir_a(nodo *src)
         std::cout << "suscribiendo " << sid << " a " << src->sid << ". " << src->sid << " -> " << sid << std::endl;
         proveedores.push_back(src);
         src->suscriptores.push_back(this);
-        if (src->mmat.type() == 0)
-            mmascara = src->mmat;
+        if (src->m_out.type() == 0)
+            mmascara = src->m_out;
         else
-            msrc = src->mmat;
+            m_src = src->m_out;
     }
 }
 
@@ -165,9 +165,9 @@ void nodo_bitwise_and::procesar()
 {
     if (proveedores.size() >= 2)
     {
-        mmat = cv::Scalar(0, 0, 0);
-        cv::bitwise_and(msrc, msrc, mmat, mmascara);
-        //cv::bitwise_and(proveedores[0]->mmat, proveedores[1]->mmat, mmat);
+        m_out = cv::Scalar(0, 0, 0);
+        cv::bitwise_and(m_src, m_src, m_out, mmascara);
+        //cv::bitwise_and(proveedores[0]->m_out, proveedores[1]->m_out, m_out);
     }
 }
 
@@ -184,10 +184,10 @@ nodo_filtro_bilateral::nodo_filtro_bilateral(cv::Point c, int r) : nodo(c, r)
 }
 void nodo_filtro_bilateral::procesar()
 {
-    if (!msrc.empty())
+    if (!m_src.empty())
     {
         d = d < 1 ? 1 : d;
-        cv::bilateralFilter(msrc, mmat, d, sigmaColor, sigmaSpace);
+        cv::bilateralFilter(m_src, m_out, d, sigmaColor, sigmaSpace);
     }
 }
 
@@ -201,15 +201,15 @@ nodo_hough_circulo::nodo_hough_circulo(cv::Point c, int r) : nodo(c, r)
 
 void nodo_hough_circulo::procesar()
 {
-    if (!msrc.empty())
+    if (!m_src.empty())
     {
-        mmat = msrc.clone();
-        cv::HoughCircles(msrc, circulos, cv::HOUGH_GRADIENT, 2, msrc.rows / 4, 200, 100);
+        m_out = m_src.clone();
+        cv::HoughCircles(m_src, circulos, cv::HOUGH_GRADIENT, 2, m_src.rows / 4, 200, 100);
         for (size_t i = 0; i < circulos.size(); i++)
         {
             cv::Point center(cvRound(circulos[i][0]), cvRound(circulos[i][1]));
             int radius = cvRound(circulos[i][2]);
-            cv::circle(mmat, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
+            cv::circle(m_out, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
         }
     }
 }

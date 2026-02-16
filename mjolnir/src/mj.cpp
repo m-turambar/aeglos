@@ -55,7 +55,7 @@ mj::mj()
 {
 
   namedWindow(wname);//, cv::WINDOW_GUI_NORMAL | WINDOW_AUTOSIZE);
-  diagrama = Mat(400,600,CV_8UC3, bckgnd);
+  diagrama = Mat(400, 600, CV_8UC3, bckgnd);
   setMouseCallback(wname,cb_mouse_static,this);
 
 }
@@ -398,7 +398,7 @@ void generar_red_tibia()
 {
     const int radio = 400;
     nodo* nss = generar_nodo<nodo_ss>(cv::Point(radio, radio), radio);
-    nss->procesar(); // necesario para inicializar mmat
+    nss->procesar(); // necesario para inicializar m_out
 
     /*********************************/
     //creamos el template de vida mana
@@ -437,7 +437,7 @@ void generar_red_tibia()
     nodo* nodo_edron = agregar_nodo<nodo_im>(cv::Point(radio*8,radio), radio,
         "/home/mike/Downloads/minimap-with-markers/edron/Minimap_Color_33024_31488_8.png");
     nodo_edron->b_mostrar = true;
-    cout << "mapa:" << nodo_edron->mmat.size;
+    cout << "mapa:" << nodo_edron->m_out.size;
     nodo_edron->procesar();
     /***********************/
     auto vida_mana = static_cast<nodo_porcentaje_vida_mana*>(agregar_nodo<nodo_porcentaje_vida_mana>(cv::Point(radio*20,radio), radio));
@@ -448,14 +448,14 @@ void generar_red_tibia()
 
     borrame->suscribir_a(mapa);
     waitKey(50);
-    cout << "nss.src ? " << nss->msrc.empty() << '\n';
-    cout << "nss.mmat ? " << nss->mmat.empty() << '\n';
-    cout << "mapa.src ? " << mapa->msrc.empty() << '\n';
-    cout << "mapa.mmat ? " << mapa->mmat.empty() << '\n';
-    cout << "templ_battle_list.msrc ? " << templ_battle_list->msrc.empty() << '\n';
-    cout << "templ_battle_list.mmat ? " << templ_battle_list->mmat.empty() << '\n';
+    cout << "nss.src ? " << nss->m_src.empty() << '\n';
+    cout << "nss.m_out ? " << nss->m_out.empty() << '\n';
+    cout << "mapa.src ? " << mapa->m_src.empty() << '\n';
+    cout << "mapa.m_out ? " << mapa->m_out.empty() << '\n';
+    cout << "templ_battle_list.m_src ? " << templ_battle_list->m_src.empty() << '\n';
+    cout << "templ_battle_list.m_out ? " << templ_battle_list->m_out.empty() << '\n';
     cout << "templ_battle_list.plantilla ? " << templ_battle_list->plantilla.empty() << '\n';
-    cout << "vida_mana.mmat ? " << vida_mana->mmat.empty() << '\n';
+    cout << "vida_mana.m_out ? " << vida_mana->m_out.empty() << '\n';
     cout << "vida_mana.roja ? " << vida_mana->roja.empty() << '\n';
     cout << "vida_mana.azul ? " << vida_mana->azul.empty() << '\n';
 }

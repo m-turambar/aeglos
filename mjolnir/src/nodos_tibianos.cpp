@@ -13,12 +13,12 @@ void nodo_template_matching::suscribir_fuente(nodo *fuente) {
         std::cout << "suscribiendo " << sid << " a " << fuente->sid << ". " << fuente->sid << " -> " << sid << std::endl;
         proveedores.push_back(fuente);
         fuente->suscriptores.push_back(this);
-        msrc = fuente->mmat;
+        m_src = fuente->m_out;
         // procuramos solo inicializar esta matriz con el tamaño correcto una vez, para ahorrar tiempo
         // por ende en alguna de las dos suscripciones se va a hacer esto
         if (plantilla.dims > 0) {
-            const int result_cols =  msrc.cols - plantilla.cols + 1;
-            const int result_rows = msrc.rows - plantilla.rows + 1;
+            const int result_cols =  m_src.cols - plantilla.cols + 1;
+            const int result_rows = m_src.rows - plantilla.rows + 1;
             floating_result = cv::Mat(result_cols, result_rows, CV_32FC1);
         }
     }
@@ -30,12 +30,12 @@ void nodo_template_matching::suscribir_plantilla(nodo *fuente)
         std::cout << "suscribiendo " << sid << " a " << fuente->sid << ". " << fuente->sid << " -> " << sid << std::endl;
         proveedores.push_back(fuente);
         fuente->suscriptores.push_back(this);
-        cv::cvtColor(fuente->mmat, plantilla, cv::COLOR_BGR2GRAY);
+        cv::cvtColor(fuente->m_out, plantilla, cv::COLOR_BGR2GRAY);
         // procuramos solo inicializar esta matriz con el tamaño correcto una vez, para ahorrar tiempo
         // por ende en alguna de las dos suscripciones se va a hacer esto
-        if (msrc.dims > 0) {
-            const int result_cols =  msrc.cols - plantilla.cols + 1;
-            const int result_rows = msrc.rows - plantilla.rows + 1;
+        if (m_src.dims > 0) {
+            const int result_cols =  m_src.cols - plantilla.cols + 1;
+            const int result_rows = m_src.rows - plantilla.rows + 1;
             floating_result = cv::Mat(result_cols, result_rows, CV_32FC1);
         }
     }
@@ -43,9 +43,9 @@ void nodo_template_matching::suscribir_plantilla(nodo *fuente)
 
 void nodo_template_matching::procesar()
 {
-    if (msrc.dims > 0 && plantilla.dims > 0)
+    if (m_src.dims > 0 && plantilla.dims > 0)
     {
-        cv::cvtColor(msrc, gris, cv::COLOR_BGR2GRAY);
+        cv::cvtColor(m_src, gris, cv::COLOR_BGR2GRAY);
         // /2
         const cv::Rect ROI = cv::Rect(cv::Point(status_col_offset, 0), cv::Point(gris.cols, gris.rows/2));
         cv::Mat columna_estatus = gris(ROI);
@@ -55,10 +55,10 @@ void nodo_template_matching::procesar()
         double minVal; double maxVal; cv::Point minLoc; cv::Point maxLoc;
         cv::minMaxLoc(floating_result, &minVal, &maxVal, &minLoc, &maxLoc);
         maxLoc.x += status_col_offset;
-        mmat = msrc(cv::Rect(maxLoc, cv::Point( maxLoc.x + plantilla.cols , maxLoc.y + plantilla.rows)));
+        m_out = m_src(cv::Rect(maxLoc, cv::Point( maxLoc.x + plantilla.cols , maxLoc.y + plantilla.rows)));
         for(auto& suscr : suscriptores)
         {
-            suscr->msrc = mmat;
+            suscr->m_src = m_out;
         }
     }
 }
@@ -70,9 +70,9 @@ nodo_porcentaje_vida_mana::nodo_porcentaje_vida_mana(cv::Point c, int r) : nodo(
 
 void nodo_porcentaje_vida_mana::procesar()
 {
-    if (!msrc.empty()) {
-        roja = msrc(cv::Rect(cv::Point(16,3), sz_barra));
-        azul = msrc(cv::Rect(cv::Point(16,16), sz_barra));
+    if (!m_src.empty()) {
+        roja = m_src(cv::Rect(cv::Point(16,3), sz_barra));
+        azul = m_src(cv::Rect(cv::Point(16,16), sz_barra));
         // for (int i=0; i < 90; ++i) {
         //     cout << "roja[" << i << "]=" << roja.at(5, i);
         // }
