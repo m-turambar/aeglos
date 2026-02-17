@@ -6,31 +6,39 @@
 
 using namespace std;
 
-nodo_video::nodo_video(cv::Point c, int r):
+nodo_video::nodo_video(cv::Point c, int r, tipo t) :
     nodo(c,r)
 {
     sid = "Video" + sid;
-    m_cap.open(0, cv::CAP_DSHOW);
-    // m_cap.open("/dev/video0");
-    // m_cap.open("/dev/video1");
-    // m_cap.open("/dev/video0", cv::CAP_DSHOW);
-    // m_cap.open("/dev/video0", cv::CAP_FFMPEG);
+    if(t == tipo::webcam) {
+        m_cap.open(0, cv::CAP_DSHOW);
+        // m_cap.open("/dev/video0"); // Linux
+        // m_cap.set(cv::CAP_PROP_FRAME_WIDTH, 320);
+        // m_cap.set(cv::CAP_PROP_FRAME_HEIGHT, 240);
+        // m_cap.set(cv::CAP_PROP_FPS, 30);
+        auto backends = cv::videoio_registry::getCameraBackends	();
+        cout << "backends:\n";
+        for(auto b : backends)
+            cout << "\t" << b << "\n";
+    }
+    else if (t == tipo::rtsp_stream) {
+        // e.g. "rtsp://foo:bar@192.168.1.50:554/stream2"
+        rstp_config config = rstp_config::get();
+        std::string rtsp_url =
+            "rtsp://" +
+            config.username + ":" + 
+            config.password + "@" + 
+            config.ipaddr + ":554/stream2"; // Tapo C500 has two streams: stream1 (1080p) and stream2 (720p)
+        m_cap.open(rtsp_url, cv::CAP_FFMPEG);
+        // ffmpeg - avoids buffering frames and thus reduces latency, but may cause frame drops if the processing is too slow
+        m_cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
+    }
+    else {
+        throw std::runtime_error("Unsupported video source type");
+    }
 
     for(auto prop : get_camera_properties())
         cout << prop << '\n';
-
-    //cout << cv::getBuildInformation();
-    m_cap.set(cv::CAP_PROP_FRAME_WIDTH, 320);
-    m_cap.set(cv::CAP_PROP_FRAME_HEIGHT, 240);
-    m_cap.set(cv::CAP_PROP_FPS, 30);
-
-    for(auto prop : get_camera_properties())
-        cout << prop << '\n';
-
-    auto backends = cv::videoio_registry::getCameraBackends	();
-    cout << "backends:\n";
-    for(auto b : backends)
-        cout << "\t" << b << "\n";
 }
 
 vector<double> nodo_video::get_camera_properties() {
@@ -48,7 +56,9 @@ void nodo_video::procesar()
 {
     auto tiempo1 = std::chrono::system_clock::now();
 
-    m_cap >> m_out;
+    m_cap.read(m_out);
+
+    // m_cap >> m_out;
     // cout << m_out.rows << "x" << m_out.cols << endl;
     // auto tiempo2 = std::chrono::system_clock::now();
     // auto dur = std::chrono::duration_cast<chrono::milliseconds>(tiempo2 - tiempo1).count();

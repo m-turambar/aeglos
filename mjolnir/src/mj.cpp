@@ -62,7 +62,7 @@ mj::mj()
 
 void mj::run() {
 
-
+  // cout << cv::getBuildInformation();
   while(true)
   {
     auto cyc1 = std::chrono::system_clock::now();
@@ -96,7 +96,7 @@ void mj::run() {
     imshow(wname,diagrama);
     auto cyc2 = std::chrono::system_clock::now();
     auto dur = std::chrono::duration_cast<chrono::milliseconds>(cyc2 - cyc1).count();
-    cout << "ciclo: " << dur << "ms\n";
+    // cout << "ciclo: " << dur << "ms\n";
   }
   
 
@@ -178,6 +178,9 @@ void mj::cb_teclado(char k)
   case 'q':
     exit=true;
     break;
+  case 'r':
+    ptr_ultimo = crear_nodo<nodo_video>(nodo_video::tipo::rtsp_stream);
+    break;
   case 's':
     ptr_ultimo = crear_nodo<nodo_ss>();
     break;
@@ -188,7 +191,7 @@ void mj::cb_teclado(char k)
     ptr_ultimo = crear_nodo<nodo_hsv>();
     break;
   case 'v':
-    ptr_ultimo = crear_nodo<nodo_video>();
+    ptr_ultimo = crear_nodo<nodo_video>(nodo_video::tipo::webcam);
     break;
 
   case 'x': //cerramos la ventana del objeto seleccionado

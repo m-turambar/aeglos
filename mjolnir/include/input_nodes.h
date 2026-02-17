@@ -42,10 +42,10 @@ struct nodo_iter_dir : nodo
 
 struct nodo_video : nodo
 {
-    nodo_video(cv::Point c, int r);
+    enum class tipo {webcam, rtsp_stream, video_file};
+    nodo_video(cv::Point c, int r, tipo t = tipo::webcam);
     void procesar() override;
     std::vector<double> get_camera_properties();
-
     cv::VideoCapture m_cap;
 };
 
